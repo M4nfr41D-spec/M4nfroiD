@@ -1,0 +1,270 @@
+{
+  "rarityConfig": {
+    "NORMAL": {
+      "color": "#B8B8B8",
+      "weight": 70
+    },
+    "RARE": {
+      "color": "#4DA3FF",
+      "weight": 20
+    },
+    "EPIC": {
+      "color": "#B24DFF",
+      "weight": 8
+    },
+    "LEGENDARY": {
+      "color": "#FFB84D",
+      "weight": 1.8
+    },
+    "MYTHIC": {
+      "color": "#FF4D8A",
+      "weight": 0.2
+    }
+  },
+  "debriefRewards": {
+    "waveCompletion": {
+      "baseScrap": 25,
+      "scrapPerWave": 3,
+      "bossBonus": 75
+    },
+    "lootRolls": {
+      "base": 1,
+      "bossBonus": 2,
+      "gradeMultipliers": {
+        "S": 2.0,
+        "A": 1.6,
+        "B": 1.3,
+        "C": 1.0,
+        "D": 0.8
+      }
+    }
+  },
+  "weaponUpgrades": {
+    "runPersistent": [
+      {
+        "id": "missile_freq_epic",
+        "name": "Missile Autoloader (Epic)",
+        "rarity": "EPIC",
+        "kind": "weapon_upgrade",
+        "weaponType": "missiles",
+        "effect": {
+          "missileFireRateMult": 1.25
+        },
+        "desc": "+25% missile fire rate (run-persistent)."
+      },
+      {
+        "id": "missile_dmg_epic",
+        "name": "Warhead Injector (Epic)",
+        "rarity": "EPIC",
+        "kind": "weapon_upgrade",
+        "weaponType": "missiles",
+        "effect": {
+          "missileDamageMult": 1.25
+        },
+        "desc": "+25% missile damage (run-persistent)."
+      },
+      {
+        "id": "missile_freq_legendary",
+        "name": "Cyclonic Loader (Legendary)",
+        "rarity": "LEGENDARY",
+        "kind": "weapon_upgrade",
+        "weaponType": "missiles",
+        "effect": {
+          "missileFireRateMult": 1.5
+        },
+        "desc": "+50% missile fire rate (run-persistent)."
+      },
+      {
+        "id": "missile_dmg_legendary",
+        "name": "Antimatter Warheads (Legendary)",
+        "rarity": "LEGENDARY",
+        "kind": "weapon_upgrade",
+        "weaponType": "missiles",
+        "effect": {
+          "missileDamageMult": 1.5
+        },
+        "desc": "+50% missile damage (run-persistent)."
+      },
+      {
+        "id": "laser_lvl6_legendary",
+        "name": "LASER Core VI (Legendary)",
+        "rarity": "LEGENDARY",
+        "kind": "weapon_level",
+        "weaponType": "laser",
+        "level": 6,
+        "desc": "Unlocks LASER Level 6 for this run."
+      },
+      {
+        "id": "laser_lvl7_mythic",
+        "name": "LASER Core VII (MYTHIC)",
+        "rarity": "MYTHIC",
+        "kind": "weapon_level",
+        "weaponType": "laser",
+        "level": 7,
+        "desc": "Unlocks LASER Level 7 (MYTHIC) for this run."
+      },
+      {
+        "id": "kaboom_lvl6_legendary",
+        "name": "KABOOM Core VI (Legendary)",
+        "rarity": "LEGENDARY",
+        "kind": "weapon_level",
+        "weaponType": "kaboom",
+        "level": 6,
+        "desc": "Unlocks KABOOM Level 6 for this run."
+      },
+      {
+        "id": "kaboom_lvl7_mythic",
+        "name": "KABOOM Core VII (MYTHIC)",
+        "rarity": "MYTHIC",
+        "kind": "weapon_level",
+        "weaponType": "kaboom",
+        "level": 7,
+        "desc": "Unlocks KABOOM Level 7 (MYTHIC) for this run."
+      },
+      {
+        "id": "dual_lvl6_legendary",
+        "name": "DUAL Core VI (Legendary)",
+        "rarity": "LEGENDARY",
+        "kind": "weapon_level",
+        "weaponType": "dual",
+        "level": 6,
+        "desc": "Unlocks DUAL Level 6 for this run."
+      },
+      {
+        "id": "dual_lvl7_mythic",
+        "name": "DUAL Core VII (MYTHIC)",
+        "rarity": "MYTHIC",
+        "kind": "weapon_level",
+        "weaponType": "dual",
+        "level": 7,
+        "desc": "Unlocks DUAL Level 7 (MYTHIC) for this run."
+      },
+      {
+        "id": "laser_starter_epic_lvl3",
+        "name": "LASER Starter III (Epic)",
+        "rarity": "EPIC",
+        "kind": "weapon_level",
+        "weaponType": "laser",
+        "level": 3,
+        "vendorEligible": true,
+        "desc": "Sets LASER to Level 3 (can overwrite current weapon)."
+      },
+      {
+        "id": "kaboom_starter_epic_lvl3",
+        "name": "KABOOM Starter III (Epic)",
+        "rarity": "EPIC",
+        "kind": "weapon_level",
+        "weaponType": "kaboom",
+        "level": 3,
+        "vendorEligible": true,
+        "desc": "Sets KABOOM to Level 3 (can overwrite current weapon)."
+      },
+      {
+        "id": "dual_starter_epic_lvl3",
+        "name": "DUAL Starter III (Epic)",
+        "rarity": "EPIC",
+        "kind": "weapon_level",
+        "weaponType": "dual",
+        "level": 3,
+        "vendorEligible": true,
+        "desc": "Sets DUAL to Level 3 (can overwrite current weapon)."
+      }
+    ],
+    "permanent": []
+  },
+  "shipUpgrades": {
+    "runPersistent": [],
+    "permanent": []
+  },
+  "visualUpgrades": {
+    "shipSkins": [
+      {
+        "id": "skin_space1",
+        "name": "Space-1 Prototype",
+        "rarity": "RARE",
+        "kind": "ship_skin",
+        "skinKey": "space1",
+        "desc": "Clean military prototype finish."
+      },
+      {
+        "id": "skin_c64_yellow",
+        "name": "Commodore-64 Yellow",
+        "rarity": "EPIC",
+        "kind": "ship_skin",
+        "skinKey": "c64_yellow",
+        "desc": "Yellow 80s sticker vibes. Pure style."
+      },
+      {
+        "id": "skin_neon_vice",
+        "name": "Neon Vice",
+        "rarity": "EPIC",
+        "kind": "ship_skin",
+        "skinKey": "neon_vice",
+        "desc": "Synthwave neon accents."
+      },
+      {
+        "id": "skin_void_black",
+        "name": "Void Black",
+        "rarity": "LEGENDARY",
+        "kind": "ship_skin",
+        "skinKey": "void_black",
+        "desc": "Swallows light. Looks expensive."
+      },
+      {
+        "id": "skin_bonzo_legacy",
+        "name": "Bonzo's Legacy Finish",
+        "rarity": "MYTHIC",
+        "kind": "ship_skin",
+        "skinKey": "bonzo_legacy",
+        "series": "bonzo",
+        "desc": "You’re not blinded by the sun anymore. You ARE the sun."
+      }
+    ],
+    "weaponEffects": []
+  },
+  "specialCapsules": {
+    "runPersistent": [],
+    "permanent": [
+      {
+        "id": "bonzo_shades",
+        "name": "Fractured Shades Shard",
+        "rarity": "MYTHIC",
+        "kind": "set_piece",
+        "series": "bonzo",
+        "desc": "25% dodge, 8% lifesteal, 20% crit"
+      },
+      {
+        "id": "bonzo_cigar",
+        "name": "Eternal Cigar Ember",
+        "rarity": "MYTHIC",
+        "kind": "set_piece",
+        "series": "bonzo",
+        "desc": "35% damage, burn effect"
+      },
+      {
+        "id": "bonzo_jacket",
+        "name": "Leather Jacket Thread",
+        "rarity": "LEGENDARY",
+        "kind": "set_piece",
+        "series": "bonzo",
+        "desc": "20% damage reduction"
+      },
+      {
+        "id": "bonzo_mullet",
+        "name": "Magnificent Mullet Strand",
+        "rarity": "LEGENDARY",
+        "kind": "set_piece",
+        "series": "bonzo",
+        "desc": "25% speed, 15% dodge"
+      },
+      {
+        "id": "bonzo_attitude",
+        "name": "Raw Attitude",
+        "rarity": "MYTHIC",
+        "kind": "set_piece",
+        "series": "bonzo",
+        "desc": "+15% to EVERYTHING (base item)"
+      }
+    ]
+  }
+}

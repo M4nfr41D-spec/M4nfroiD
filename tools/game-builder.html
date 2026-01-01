@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>🎮 M4NFROID GALACTICA - GAME BUILDER v2.0</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:linear-gradient(135deg,#050510 0%,#0a1020 50%,#100520 100%);
+  color:#fff;font-family:'Orbitron',monospace;min-height:100vh;
+}
+.header{
+  background:linear-gradient(180deg,rgba(0,255,136,.1) 0%,transparent 100%);
+  padding:30px 20px;text-align:center;border-bottom:1px solid rgba(0,255,136,.2);
+}
+h1{
+  font-size:32px;letter-spacing:4px;
+  background:linear-gradient(90deg,#00ff88,#00d4ff,#8B5CF6,#EC4899);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  margin-bottom:8px;
+}
+.tagline{color:#888;font-size:13px}
+.container{max-width:1200px;margin:0 auto;padding:25px}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;margin-bottom:25px}
+.tab{
+  flex:1;padding:14px;text-align:center;
+  background:rgba(0,0,0,.3);border:2px solid rgba(255,255,255,.1);
+  border-radius:10px 10px 0 0;cursor:pointer;transition:.2s;
+  font-size:13px;font-weight:700;
+}
+.tab:hover{border-color:rgba(0,255,136,.3)}
+.tab.active{
+  background:rgba(0,255,136,.1);border-color:#00ff88;
+  border-bottom-color:transparent;color:#00ff88;
+}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* Panels */
+.panel{
+  background:rgba(0,0,0,.35);border:1px solid rgba(0,255,136,.2);
+  border-radius:12px;padding:20px;margin-bottom:20px;
+}
+.panel-title{
+  font-size:16px;font-weight:700;color:#00ff88;margin-bottom:15px;
+  display:flex;align-items:center;gap:10px;
+}
+.panel-title span{font-size:22px}
+
+/* Inputs */
+.file-drop{
+  border:2px dashed rgba(0,255,136,.4);border-radius:12px;
+  padding:40px;text-align:center;cursor:pointer;transition:.2s;
+  background:rgba(0,50,30,.1);
+}
+.file-drop:hover,.file-drop.dragover{
+  border-color:#00ff88;background:rgba(0,255,136,.08);
+}
+.file-drop.loaded{border-style:solid;border-color:#00ff88}
+.file-drop input{display:none}
+.file-drop-icon{font-size:48px;margin-bottom:12px}
+.file-drop-text{font-size:14px;color:#aaa}
+.file-drop-hint{font-size:11px;color:#666;margin-top:8px}
+.loaded-info{
+  background:rgba(0,255,136,.1);border-radius:8px;padding:12px;margin-top:12px;
+  font-size:12px;color:#00ff88;display:none;
+}
+.loaded-info.visible{display:block}
+
+/* Buttons */
+.btn{
+  padding:14px 28px;border:2px solid;background:transparent;
+  font-family:'Orbitron',monospace;font-weight:700;font-size:13px;
+  border-radius:10px;cursor:pointer;transition:.2s;
+}
+.btn:hover{transform:translateY(-2px)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-primary{border-color:#00ff88;color:#00ff88}
+.btn-primary:hover{background:rgba(0,255,136,.15);box-shadow:0 8px 30px rgba(0,255,136,.2)}
+.btn-secondary{border-color:#00d4ff;color:#00d4ff}
+.btn-secondary:hover{background:rgba(0,212,255,.15)}
+.btn-purple{border-color:#8B5CF6;color:#8B5CF6}
+.btn-purple:hover{background:rgba(139,92,246,.15)}
+.btn-danger{border-color:#ff4466;color:#ff4466}
+.btn-danger:hover{background:rgba(255,68,102,.15)}
+
+/* Grid */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+@media(max-width:900px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+/* Asset Grid */
+.asset-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:12px;margin-top:15px;
+}
+.asset-card{
+  background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);
+  border-radius:10px;padding:10px;text-align:center;position:relative;
+}
+.asset-card img{max-width:80px;max-height:80px;margin-bottom:8px;image-rendering:pixelated}
+.asset-card-name{font-size:10px;color:#aaa;word-break:break-all}
+.asset-card-type{
+  font-size:9px;padding:2px 6px;border-radius:10px;margin-top:5px;
+  display:inline-block;
+}
+.asset-card-type.player{background:rgba(0,255,136,.2);color:#00ff88}
+.asset-card-type.enemy{background:rgba(255,102,102,.2);color:#ff6666}
+.asset-card-type.boss{background:rgba(139,92,246,.2);color:#8B5CF6}
+.asset-card-type.skin{background:rgba(255,170,0,.2);color:#ffaa00}
+.asset-card-remove{
+  position:absolute;top:5px;right:5px;width:20px;height:20px;
+  background:rgba(255,68,102,.8);border:none;border-radius:50%;
+  color:#fff;cursor:pointer;font-size:12px;line-height:20px;
+}
+
+/* Loot Items */
+.loot-item{
+  display:flex;align-items:center;gap:12px;padding:12px;
+  background:rgba(0,0,0,.3);border:1px solid;border-radius:8px;margin-bottom:8px;
+}
+.loot-item.NORMAL{border-color:rgba(156,163,175,.4)}
+.loot-item.RARE{border-color:rgba(59,130,246,.5)}
+.loot-item.EPIC{border-color:rgba(139,92,246,.6)}
+.loot-item.LEGENDARY{border-color:rgba(245,158,11,.7)}
+.loot-item.MYTHIC{border-color:rgba(236,72,153,.8)}
+.loot-icon{font-size:28px}
+.loot-info{flex:1}
+.loot-name{font-size:13px;font-weight:700}
+.loot-desc{font-size:10px;color:#888;margin-top:2px}
+.loot-rarity{font-size:9px;font-weight:800;letter-spacing:1px}
+
+/* Progress */
+.progress{
+  height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;margin-top:15px;
+}
+.progress-bar{height:100%;background:linear-gradient(90deg,#00ff88,#00d4ff);width:0%;transition:.3s}
+
+/* Log */
+.log{
+  background:rgba(0,0,0,.5);border-radius:8px;padding:12px;
+  font-size:11px;color:#888;max-height:200px;overflow-y:auto;
+  font-family:monospace;line-height:1.6;
+}
+.log .success{color:#00ff88}
+.log .warn{color:#ffaa00}
+.log .error{color:#ff4466}
+.log .info{color:#00d4ff}
+
+/* Stats */
+.stats{display:flex;gap:15px;flex-wrap:wrap;margin-top:15px}
+.stat{
+  background:rgba(0,0,0,.3);border-radius:8px;padding:12px 20px;text-align:center;
+}
+.stat-value{font-size:24px;font-weight:900;color:#00d4ff}
+.stat-label{font-size:10px;color:#888;margin-top:4px}
+
+/* Actions */
+.actions{display:flex;gap:12px;justify-content:center;margin-top:25px;flex-wrap:wrap}
+
+/* Checkboxes */
+.options{display:flex;flex-wrap:wrap;gap:20px;font-size:12px;color:#ccc}
+.options label{display:flex;align-items:center;gap:8px;cursor:pointer}
+.options input[type="checkbox"]{width:16px;height:16px;accent-color:#00ff88}
+
+/* Preview */
+.preview-frame{
+  width:100%;height:500px;border:2px solid rgba(0,255,136,.3);
+  border-radius:12px;background:#000;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎮 M4NFROID GALACTICA</h1>
+  <div class="tagline">GAME BUILDER v2.0 — One-Click Integration for Sprites, Loot & More</div>
+</div>
+
+<div class="container">
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('build')">🔧 BUILD GAME</div>
+    <div class="tab" onclick="showTab('sprites')">🎨 SPRITE MANAGER</div>
+    <div class="tab" onclick="showTab('loot')">📦 LOOT EDITOR</div>
+    <div class="tab" onclick="showTab('preview')">▶️ PREVIEW</div>
+  </div>
+  
+  <!-- TAB: Build Game -->
+  <div id="tab-build" class="tab-content active">
+    
+    <!-- Step 1: Base Game -->
+    <div class="panel">
+      <div class="panel-title"><span>1️⃣</span> Load Base Game</div>
+      <div class="file-drop" id="gameDropZone" onclick="document.getElementById('gameFileInput').click()">
+        <input type="file" id="gameFileInput" accept=".html,.htm" onchange="loadGameFile(this.files[0])">
+        <div class="file-drop-icon">📄</div>
+        <div class="file-drop-text">Drop your V8/V9 game HTML here</div>
+        <div class="file-drop-hint">or click to browse</div>
+      </div>
+      <div id="gameLoadedInfo" class="loaded-info">
+        <strong>✅ Game Loaded:</strong> <span id="gameName"></span> (<span id="gameSize"></span> KB)
+      </div>
+    </div>
+    
+    <!-- Step 2: Assets -->
+    <div class="panel">
+      <div class="panel-title"><span>2️⃣</span> Add Sprites (Optional)</div>
+      <div class="file-drop" id="spriteDropZone" onclick="document.getElementById('spriteFileInput').click()">
+        <input type="file" id="spriteFileInput" accept="image/*" multiple onchange="loadSpriteFiles(this.files)">
+        <div class="file-drop-icon">🖼️</div>
+        <div class="file-drop-text">Drop PNG sprites here</div>
+        <div class="file-drop-hint">player, enemy, boss images — auto-detected by filename</div>
+      </div>
+      <div id="spriteGrid" class="asset-grid"></div>
+      <div id="spriteLoadedInfo" class="loaded-info">
+        <strong>✅ Sprites:</strong> <span id="spriteCount">0</span> loaded
+      </div>
+    </div>
+    
+    <!-- Step 3: Loot Data -->
+    <div class="panel">
+      <div class="panel-title"><span>3️⃣</span> Loot Tables (Optional)</div>
+      <div class="file-drop" id="lootDropZone" onclick="document.getElementById('lootFileInput').click()">
+        <input type="file" id="lootFileInput" accept=".json" onchange="loadLootFile(this.files[0])">
+        <div class="file-drop-icon">📦</div>
+        <div class="file-drop-text">Drop loot-tables.json here</div>
+        <div class="file-drop-hint">from Loot Editor export</div>
+      </div>
+      <div id="lootLoadedInfo" class="loaded-info">
+        <strong>✅ Loot Data:</strong> <span id="lootItemCount">0</span> items loaded
+      </div>
+    </div>
+    
+    <!-- Step 4: Options -->
+    <div class="panel">
+      <div class="panel-title"><span>4️⃣</span> Build Options</div>
+      <div class="options">
+        <label><input type="checkbox" id="optEmbedSprites" checked> Embed sprites (no external files)</label>
+        <label><input type="checkbox" id="optFixDropRates" checked> Fix loot drop rates (3%)</label>
+        <label><input type="checkbox" id="optAddVendor" checked> Include Vendor Shop</label>
+        <label><input type="checkbox" id="optAddInventory" checked> Loot Inventory system</label>
+        <label><input type="checkbox" id="optAddGrading" checked> Performance Grading</label>
+      </div>
+    </div>
+    
+    <!-- Step 5: Build -->
+    <div class="panel">
+      <div class="panel-title"><span>5️⃣</span> Build & Download</div>
+      <div class="actions">
+        <button id="btnBuild" class="btn btn-primary" onclick="buildGame()" disabled>
+          ⚡ BUILD GAME
+        </button>
+        <button id="btnDownload" class="btn btn-purple" onclick="downloadGame()" disabled>
+          📥 DOWNLOAD
+        </button>
+        <button class="btn btn-secondary" onclick="previewGame()">
+          ▶️ PREVIEW
+        </button>
+      </div>
+      
+      <div class="progress" id="buildProgress" style="display:none">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      
+      <div id="buildLog" class="log" style="display:none;margin-top:15px"></div>
+      
+      <div id="buildStats" class="stats" style="display:none">
+        <div class="stat"><div class="stat-value" id="statSprites">0</div><div class="stat-label">SPRITES</div></div>
+        <div class="stat"><div class="stat-value" id="statItems">0</div><div class="stat-label">LOOT ITEMS</div></div>
+        <div class="stat"><div class="stat-value" id="statPatches">0</div><div class="stat-label">PATCHES</div></div>
+        <div class="stat"><div class="stat-value" id="statSize">0</div><div class="stat-label">SIZE (KB)</div></div>
+      </div>
+    </div>
+    
+  </div>
+  
+  <!-- TAB: Sprite Manager -->
+  <div id="tab-sprites" class="tab-content">
+    <div class="panel">
+      <div class="panel-title"><span>🎨</span> Sprite Manager</div>
+      <p style="color:#888;font-size:12px;margin-bottom:15px">
+        Upload sprites with standard names to auto-detect their type:<br>
+        <code>ship_normal.png</code>, <code>enemy_tank.png</code>, <code>boss_1.png</code>, etc.
+      </p>
+      <div class="file-drop" onclick="document.getElementById('spriteMgrInput').click()">
+        <input type="file" id="spriteMgrInput" accept="image/*" multiple onchange="loadSpriteFiles(this.files)">
+        <div class="file-drop-icon">🖼️</div>
+        <div class="file-drop-text">Add Sprites</div>
+      </div>
+      <div id="spriteMgrGrid" class="asset-grid"></div>
+    </div>
+  </div>
+  
+  <!-- TAB: Loot Editor -->
+  <div id="tab-loot" class="tab-content">
+    <div class="panel">
+      <div class="panel-title"><span>📦</span> Quick Loot Editor</div>
+      <p style="color:#888;font-size:12px;margin-bottom:15px">
+        Add loot items quickly. For full editing, use the standalone Loot Editor tool.
+      </p>
+      <div class="grid-2">
+        <div>
+          <h3 style="color:#00d4ff;font-size:14px;margin-bottom:10px">Weapon Upgrades</h3>
+          <div id="weaponLootList"></div>
+        </div>
+        <div>
+          <h3 style="color:#8B5CF6;font-size:14px;margin-bottom:10px">Ship Upgrades</h3>
+          <div id="shipLootList"></div>
+        </div>
+      </div>
+      <div class="actions" style="margin-top:20px">
+        <button class="btn btn-primary" onclick="addLootItem()">➕ Add Item</button>
+        <button class="btn btn-secondary" onclick="exportLoot()">📤 Export JSON</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- TAB: Preview -->
+  <div id="tab-preview" class="tab-content">
+    <div class="panel">
+      <div class="panel-title"><span>▶️</span> Game Preview</div>
+      <iframe id="previewFrame" class="preview-frame"></iframe>
+    </div>
+  </div>
+  
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let gameContent = null;
+let gameName = 'game';
+let sprites = new Map(); // filename -> {dataUrl, type, key}
+let lootData = null;
+let builtContent = null;
+
+// ============================================================
+// TAB NAVIGATION
+// ============================================================
+function showTab(tabId) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  
+  document.querySelector(`.tab:nth-child(${['build','sprites','loot','preview'].indexOf(tabId)+1})`).classList.add('active');
+  document.getElementById('tab-' + tabId).classList.add('active');
+}
+
+// ============================================================
+// FILE LOADING
+// ============================================================
+
+// Game HTML
+function loadGameFile(file) {
+  if (!file) return;
+  
+  gameName = file.name.replace(/\.html?$/i, '');
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    gameContent = e.target.result;
+    
+    document.getElementById('gameDropZone').classList.add('loaded');
+    document.getElementById('gameLoadedInfo').classList.add('visible');
+    document.getElementById('gameName').textContent = file.name;
+    document.getElementById('gameSize').textContent = Math.round(file.size / 1024);
+    
+    checkBuildReady();
+    log('✅ Game loaded: ' + file.name, 'success');
+  };
+  reader.readAsText(file);
+}
+
+// Sprites
+function loadSpriteFiles(files) {
+  if (!files || !files.length) return;
+  
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const dataUrl = e.target.result;
+      const filename = file.name.toLowerCase();
+      
+      // Auto-detect type from filename
+      let type = 'unknown';
+      let key = filename.replace(/\.(png|jpg|jpeg|gif|webp)$/i, '');
+      
+      if (filename.includes('ship') || filename.includes('player')) {
+        type = 'player';
+        key = key.replace('ship_', '').replace('player_', '');
+      } else if (filename.includes('enemy')) {
+        type = 'enemy';
+        key = key.replace('enemy_', '');
+      } else if (filename.includes('boss')) {
+        type = 'boss';
+        key = key.replace('boss_', '').replace('boss', 'boss');
+      } else if (filename.includes('skin')) {
+        type = 'skin';
+      }
+      
+      sprites.set(filename, { dataUrl, type, key, name: file.name });
+      renderSpriteGrid();
+    };
+    reader.readAsDataURL(file);
+  });
+  
+  document.getElementById('spriteDropZone').classList.add('loaded');
+  document.getElementById('spriteLoadedInfo').classList.add('visible');
+}
+
+function renderSpriteGrid() {
+  const grid1 = document.getElementById('spriteGrid');
+  const grid2 = document.getElementById('spriteMgrGrid');
+  
+  let html = '';
+  sprites.forEach((sprite, filename) => {
+    html += `
+      <div class="asset-card">
+        <button class="asset-card-remove" onclick="removeSprite('${filename}')">×</button>
+        <img src="${sprite.dataUrl}" alt="${filename}">
+        <div class="asset-card-name">${sprite.name}</div>
+        <div class="asset-card-type ${sprite.type}">${sprite.type.toUpperCase()}</div>
+      </div>
+    `;
+  });
+  
+  grid1.innerHTML = html;
+  grid2.innerHTML = html;
+  document.getElementById('spriteCount').textContent = sprites.size;
+}
+
+function removeSprite(filename) {
+  sprites.delete(filename);
+  renderSpriteGrid();
+}
+
+// Loot JSON
+function loadLootFile(file) {
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      lootData = JSON.parse(e.target.result);
+      
+      let itemCount = countLootItems(lootData);
+      
+      document.getElementById('lootDropZone').classList.add('loaded');
+      document.getElementById('lootLoadedInfo').classList.add('visible');
+      document.getElementById('lootItemCount').textContent = itemCount;
+      
+      renderLootLists();
+      checkBuildReady();
+      log('✅ Loot data loaded: ' + itemCount + ' items', 'success');
+    } catch(err) {
+      log('❌ Invalid JSON: ' + err.message, 'error');
+    }
+  };
+  reader.readAsText(file);
+}
+
+
+  function safeJSONStringify(obj) {
+    let s = JSON.stringify(obj, null, 2);
+    // Avoid closing the surrounding <script> tag in the exported single-file HTML
+    // Escape any '</script' sequence defensively.
+    s = s.replace(/<\//gi, '<\\/').replace(/<\\/script/gi, '<\\/scr' + 'ipt');
+    // Avoid HTML comment opens
+    s = s.replace(/<!--/g, '<\\!--');
+    // Harden against unicode line separators
+    s = s.replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+    return s;
+  }
+
+function countLootItems(data) {
+  let count = 0;
+  ['weaponUpgrades', 'shipUpgrades', 'visualUpgrades'].forEach(cat => {
+    if (data && data[cat]) {
+      Object.keys(data[cat]).forEach(sub => {
+        if (Array.isArray(data[cat][sub])) count += data[cat][sub].length;
+      });
+    }
+  });
+  return count;
+}
+
+function renderLootLists() {
+  // Simplified loot display
+  const weaponDiv = document.getElementById('weaponLootList');
+  const shipDiv = document.getElementById('shipLootList');
+  
+  if (!lootData) {
+    weaponDiv.innerHTML = '<div style="color:#666">No loot data loaded</div>';
+    shipDiv.innerHTML = '<div style="color:#666">No loot data loaded</div>';
+    return;
+  }
+  
+  let wHtml = '', sHtml = '';
+  
+  ['temporary', 'runPersistent', 'permanent'].forEach(sub => {
+    if (lootData.weaponUpgrades && lootData.weaponUpgrades[sub]) {
+      lootData.weaponUpgrades[sub].forEach(item => {
+        wHtml += renderLootItem(item);
+      });
+    }
+    if (lootData.shipUpgrades && lootData.shipUpgrades[sub]) {
+      lootData.shipUpgrades[sub].forEach(item => {
+        sHtml += renderLootItem(item);
+      });
+    }
+  });
+  
+  weaponDiv.innerHTML = wHtml || '<div style="color:#666">No weapon upgrades</div>';
+  shipDiv.innerHTML = sHtml || '<div style="color:#666">No ship upgrades</div>';
+}
+
+function renderLootItem(item) {
+  return `
+    <div class="loot-item ${item.rarity || 'NORMAL'}">
+      <div class="loot-icon">${item.icon || '⭐'}</div>
+      <div class="loot-info">
+        <div class="loot-name">${item.name}</div>
+        <div class="loot-desc">${item.description || ''}</div>
+      </div>
+      <div class="loot-rarity">${item.rarity || 'NORMAL'}</div>
+    </div>
+  `;
+}
+
+// ============================================================
+// BUILD SYSTEM
+// ============================================================
+
+function checkBuildReady() {
+  const ready = gameContent !== null;
+  document.getElementById('btnBuild').disabled = !ready;
+}
+
+function log(msg, type = 'info') {
+  const logEl = document.getElementById('buildLog');
+  logEl.style.display = 'block';
+  const line = document.createElement('div');
+  line.className = type;
+  line.textContent = msg;
+  logEl.appendChild(line);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function setProgress(pct) {
+  document.getElementById('buildProgress').style.display = 'block';
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+async function buildGame() {
+  if (!gameContent) {
+    alert('Please load a game file first!');
+    return;
+  }
+  
+  document.getElementById('buildLog').innerHTML = '';
+  document.getElementById('buildLog').style.display = 'block';
+  document.getElementById('buildStats').style.display = 'none';
+  
+  log('🚀 Starting build...', 'info');
+  setProgress(0);
+  
+  let content = gameContent;
+  let patchCount = 0;
+  
+  await sleep(100);
+  
+  // 1. Embed sprites as Base64
+  if (document.getElementById('optEmbedSprites').checked && sprites.size > 0) {
+    log('📦 Embedding ' + sprites.size + ' sprites...', 'info');
+    setProgress(20);
+    
+    // Find SPRITE_MANIFEST and replace paths with data URLs
+    const manifestRegex = /var SPRITE_MANIFEST\s*=\s*\{[\s\S]*?\n\};/;
+    
+    if (manifestRegex.test(content)) {
+      let manifestStr = content.match(manifestRegex)[0];
+      
+      sprites.forEach((sprite, filename) => {
+        // Replace path references with data URL
+        const patterns = [
+          new RegExp(`["']player/${sprite.key}\\.png["']`, 'g'),
+          new RegExp(`["']enemies/${sprite.key}\\.png["']`, 'g'),
+          new RegExp(`["']boss/${sprite.key}\\.png["']`, 'g'),
+          new RegExp(`["'][^"']*${sprite.key}\\.png["']`, 'g')
+        ];
+        
+        // For now, we'll inject a pre-load script instead
+      });
+      
+      // Add embedded sprite loader
+      const embedScript = generateSpriteEmbedScript();
+      const insertPoint = content.indexOf('</head>');
+      if (insertPoint > -1) {
+        content = content.slice(0, insertPoint) + '\n' + embedScript + '\n' + content.slice(insertPoint);
+        log('✅ Sprite embed script added', 'success');
+        patchCount++;
+      }
+    }
+  }
+  
+  await sleep(100);
+  setProgress(40);
+  
+  // 2. Patch LOOT_DATA
+  if (lootData) {
+    log('📦 Patching loot data...', 'info');
+    
+    // Robust match: LOOT_DATA can be var/let/const and may not include a newline before the semicolon
+    // We replace the entire assignment statement.
+    const lootDataRegex = /(var|let|const)\s+LOOT_DATA\s*=\s*[\s\S]*?;/m;
+    
+        if (lootDataRegex.test(content)) {
+      const newLootData = 'var LOOT_DATA = ' + safeJSONStringify(lootData) + ';';
+      // Replace entire assignment statement (keeps surrounding <script> intact)
+      content = content.replace(lootDataRegex, newLootData);
+
+      log('✅ LOOT_DATA replaced with ' + countLootItems(lootData) + ' items', 'success');
+      patchCount++;
+    } else {
+      log('⚠️ LOOT_DATA not found in game - will add...', 'warn');
+      const inject = '\n<script>\nvar LOOT_DATA = ' + safeJSONStringify(lootData) + ';\n</script>\n';
+      const headClose = content.indexOf('</head>');
+      if (headClose > -1) {
+        content = content.slice(0, headClose) + inject + content.slice(headClose);
+        log('✅ LOOT_DATA injected into <head>', 'success');
+        patchCount++;
+      } else {
+        content = inject + content;
+        log('✅ LOOT_DATA injected at top of file', 'success');
+        patchCount++;
+      }
+    }
+  }
+  
+  await sleep(100);
+  setProgress(60);
+  
+  // 3. Update version
+  const versionRegex = /GALACTICA v[\d.]+[^"']*/i;
+  if (versionRegex.test(content)) {
+    content = content.replace(versionRegex, 'GALACTICA v9.2 - BUILDER EDITION');
+    log('✅ Version updated', 'success');
+    patchCount++;
+  }
+  
+  await sleep(100);
+  setProgress(80);
+  
+  // 4. Verify systems
+  log('🔍 Verifying systems...', 'info');
+  
+  const systems = [
+    { name: 'LootSystem', pattern: 'var LootSystem', opt: true },
+    { name: 'V9UpgradeManager', pattern: 'var V9UpgradeManager', opt: true },
+    { name: 'Vendor Shop', pattern: 'vendorStock', opt: 'optAddVendor' },
+    { name: 'Loot Inventory', pattern: 'collectLootToInventory', opt: 'optAddInventory' },
+    { name: 'Performance Grading', pattern: 'calculatePerformanceGrade', opt: 'optAddGrading' }
+  ];
+  
+  systems.forEach(sys => {
+    const hasSystem = content.includes(sys.pattern);
+    const wantSystem = sys.opt === true || (sys.opt && document.getElementById(sys.opt).checked);
+    
+    if (hasSystem) {
+      log('✅ ' + sys.name + ' present', 'success');
+    } else if (wantSystem) {
+      log('⚠️ ' + sys.name + ' not found - needs V9 base game', 'warn');
+    }
+  });
+  
+  setProgress(100);
+  
+  // Store result
+  builtContent = content;
+  
+  // Update stats
+  document.getElementById('buildStats').style.display = 'flex';
+  document.getElementById('statSprites').textContent = sprites.size;
+  document.getElementById('statItems').textContent = lootData ? countLootItems(lootData) : 0;
+  document.getElementById('statPatches').textContent = patchCount;
+  document.getElementById('statSize').textContent = Math.round(content.length / 1024);
+  
+  log('', 'info');
+  log('🎉 BUILD COMPLETE! ' + patchCount + ' patches applied.', 'success');
+  
+  document.getElementById('btnDownload').disabled = false;
+}
+
+function generateSpriteEmbedScript() {
+  let script = '<script id="embeddedSprites">\n';
+  script += '// Auto-embedded sprites\n';
+  script += 'var EMBEDDED_SPRITES = {\n';
+  
+  sprites.forEach((sprite, filename) => {
+    const key = sprite.type + '.' + sprite.key;
+    script += `  "${key}": "${sprite.dataUrl}",\n`;
+  });
+  
+  script += '};\n';
+  script += `
+// Override sprite loading to use embedded data
+(function() {
+  var origImage = window.Image;
+  window.Image = function() {
+    var img = new origImage();
+    var origSrc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
+    Object.defineProperty(img, 'src', {
+      set: function(val) {
+        // Check if we have an embedded version
+        for (var key in EMBEDDED_SPRITES) {
+          if (val.includes(key.split('.').pop())) {
+            origSrc.set.call(img, EMBEDDED_SPRITES[key]);
+            return;
+          }
+        }
+        origSrc.set.call(img, val);
+      },
+      get: function() { return origSrc.get.call(img); }
+    });
+    return img;
+  };
+})();
+`;
+  script += '</script>\n';
+  return script;
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function downloadGame() {
+  if (!builtContent) {
+    alert('Please build first!');
+    return;
+  }
+  
+  const blob = new Blob([builtContent], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = gameName + '-BUILT.html';
+  a.click();
+  URL.revokeObjectURL(url);
+  
+  log('📥 Downloaded: ' + a.download, 'success');
+}
+
+function previewGame() {
+  if (!builtContent && !gameContent) {
+    alert('Please load a game first!');
+    return;
+  }
+  
+  showTab('preview');
+  
+  const frame = document.getElementById('previewFrame');
+  const content = builtContent || gameContent;
+  
+  frame.srcdoc = content;
+}
+
+// ============================================================
+// LOOT EDITOR FUNCTIONS
+// ============================================================
+function addLootItem() {
+  alert('For full loot editing, please use the standalone Loot Editor tool.\n\nThe quick editor here is for viewing only.');
+}
+
+function exportLoot() {
+  if (!lootData) {
+    alert('No loot data loaded!');
+    return;
+  }
+  
+  const blob = new Blob([safeJSONStringify(lootData)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'loot-tables.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// DRAG & DROP
+// ============================================================
+['gameDropZone', 'spriteDropZone', 'lootDropZone'].forEach(id => {
+  const zone = document.getElementById(id);
+  if (!zone) return;
+  
+  zone.addEventListener('dragover', e => {
+    e.preventDefault();
+    zone.classList.add('dragover');
+  });
+  
+  zone.addEventListener('dragleave', e => {
+    zone.classList.remove('dragover');
+  });
+  
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    
+    const files = e.dataTransfer.files;
+    if (!files.length) return;
+    
+    if (id === 'gameDropZone') {
+      loadGameFile(files[0]);
+    } else if (id === 'spriteDropZone') {
+      loadSpriteFiles(files);
+    } else if (id === 'lootDropZone') {
+      loadLootFile(files[0]);
+    }
+  });
+});
+
+// Init
+log('Ready! Load a game file to start.', 'info');
+</script>
+
+</body>
+</html>

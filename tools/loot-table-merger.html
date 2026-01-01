@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loot Table Merger - Safe Integration Tool</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #0a0f1e 0%, #050510 100%);
+      color: #e0e6ff;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .header h1 {
+      font-size: 42px;
+      background: linear-gradient(90deg, #00ff88, #00d4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    
+    .warning-box {
+      background: rgba(255, 60, 60, 0.2);
+      border: 2px solid #ff3b3b;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .warning-box h2 {
+      color: #ff3b3b;
+      margin-bottom: 10px;
+    }
+    
+    .warning-box p {
+      color: rgba(255, 200, 200, 0.9);
+      line-height: 1.6;
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .panel {
+      background: rgba(30, 40, 70, 0.6);
+      border: 2px solid rgba(0, 255, 136, 0.3);
+      border-radius: 15px;
+      padding: 25px;
+      min-height: 400px;
+    }
+    
+    .panel h2 {
+      font-size: 20px;
+      color: #00ff88;
+      margin-bottom: 20px;
+      border-bottom: 2px solid rgba(0, 255, 136, 0.3);
+      padding-bottom: 10px;
+    }
+    
+    .file-upload {
+      border: 2px dashed rgba(100, 200, 255, 0.5);
+      border-radius: 10px;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 20px;
+    }
+    
+    .file-upload:hover {
+      border-color: #00ff88;
+      background: rgba(0, 255, 136, 0.1);
+    }
+    
+    .file-upload input[type="file"] {
+      display: none;
+    }
+    
+    .file-status {
+      margin-top: 15px;
+      padding: 10px;
+      background: rgba(0, 255, 136, 0.2);
+      border-radius: 8px;
+      font-size: 14px;
+      color: #00ff88;
+    }
+    
+    .code-preview {
+      background: rgba(10, 15, 25, 0.9);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      border-radius: 8px;
+      padding: 15px;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      color: #00ff88;
+      max-height: 500px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .stat-card {
+      background: rgba(20, 30, 50, 0.8);
+      border: 1px solid rgba(100, 200, 255, 0.3);
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 32px;
+      font-weight: 900;
+      color: #00ff88;
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: rgba(200, 210, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .btn {
+      padding: 15px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #00ff88, #00d4ff);
+      color: #000;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .btn-secondary {
+      background: rgba(100, 200, 255, 0.2);
+      border: 1px solid rgba(100, 200, 255, 0.5);
+      color: #00d4ff;
+    }
+    
+    .conflict-list {
+      margin: 15px 0;
+    }
+    
+    .conflict-item {
+      background: rgba(255, 150, 0, 0.2);
+      border: 1px solid rgba(255, 150, 0, 0.5);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .conflict-item h4 {
+      color: #ffaa00;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+    
+    .conflict-item p {
+      color: rgba(255, 200, 150, 0.9);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+    
+    .conflict-options {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .conflict-options button {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid rgba(100, 200, 255, 0.5);
+      background: rgba(20, 30, 50, 0.8);
+      color: #00d4ff;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+    
+    .conflict-options button.selected {
+      background: rgba(0, 255, 136, 0.3);
+      border-color: #00ff88;
+      color: #00ff88;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Header -->
+    <div class="header">
+      <h1>⚙️ LOOT TABLE MERGER</h1>
+      <p>Safely Combine Old & New Loot Tables Without Losing Data</p>
+    </div>
+    
+    <!-- Warning -->
+    <div class="warning-box">
+      <h2>⚠️ IMPORTANT - Read Before Merging!</h2>
+      <p>
+        <strong>NEVER overwrite your existing loot-tables.json!</strong><br><br>
+        This tool safely merges your old loot table with the new progression system version.
+        It will detect conflicts (duplicate IDs) and let you choose which to keep.<br><br>
+        <strong>Always backup your original file first!</strong>
+      </p>
+    </div>
+    
+    <!-- Main Grid -->
+    <div class="grid">
+      
+      <!-- Old File -->
+      <div class="panel">
+        <h2>📁 Your Existing Loot Table</h2>
+        
+        <div class="file-upload" onclick="document.getElementById('oldFile').click()">
+          <div style="font-size: 48px; margin-bottom: 10px;">📤</div>
+          <div style="color: rgba(200, 210, 255, 0.9);">
+            Click to upload<br>
+            <strong>YOUR CURRENT</strong><br>
+            loot-tables.json
+          </div>
+          <input type="file" id="oldFile" accept=".json" onchange="loadOldFile(event)">
+        </div>
+        
+        <div id="oldFileStatus" style="display: none;" class="file-status">
+          ✅ Loaded: <span id="oldFileName"></span>
+        </div>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="oldItemCount">0</div>
+            <div class="stat-label">Total Items</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="oldShipCount">0</div>
+            <div class="stat-label">Ship Skins</div>
+          </div>
+        </div>
+        
+        <div class="code-preview" id="oldPreview">
+          Upload your existing loot-tables.json to preview...
+        </div>
+      </div>
+      
+      <!-- New File -->
+      <div class="panel">
+        <h2>🆕 New Progression System</h2>
+        
+        <div class="file-upload" onclick="document.getElementById('newFile').click()">
+          <div style="font-size: 48px; margin-bottom: 10px;">📥</div>
+          <div style="color: rgba(200, 210, 255, 0.9);">
+            Click to upload<br>
+            <strong>NEW VERSION</strong><br>
+            loot-tables.json
+          </div>
+          <input type="file" id="newFile" accept=".json" onchange="loadNewFile(event)">
+        </div>
+        
+        <div id="newFileStatus" style="display: none;" class="file-status">
+          ✅ Loaded: <span id="newFileName"></span>
+        </div>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="newItemCount">0</div>
+            <div class="stat-label">Total Items</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="newShipCount">0</div>
+            <div class="stat-label">Ship Skins</div>
+          </div>
+        </div>
+        
+        <div class="code-preview" id="newPreview">
+          Upload the new loot-tables.json from v8_progression package...
+        </div>
+      </div>
+      
+      <!-- Merged Result -->
+      <div class="panel">
+        <h2>✅ Merged Result</h2>
+        
+        <div id="conflictSection" style="display: none;">
+          <h3 style="color: #ffaa00; margin-bottom: 15px;">⚠️ Conflicts Detected</h3>
+          <div class="conflict-list" id="conflictList"></div>
+        </div>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="mergedItemCount">0</div>
+            <div class="stat-label">Total Items</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="conflictCount">0</div>
+            <div class="stat-label">Conflicts</div>
+          </div>
+        </div>
+        
+        <button class="btn btn-primary" id="mergeBtn" disabled onclick="performMerge()">
+          🔀 Merge Files
+        </button>
+        
+        <button class="btn btn-secondary" id="downloadBtn" disabled onclick="downloadMerged()">
+          💾 Download Merged JSON
+        </button>
+        
+        <button class="btn btn-secondary" onclick="copyToClipboard()">
+          📋 Copy to Clipboard
+        </button>
+        
+        <div class="code-preview" id="mergedPreview">
+          Upload both files to see merged result...
+        </div>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  <script>
+    let oldData = null;
+    let newData = null;
+    let mergedData = null;
+    let conflicts = [];
+    let conflictResolutions = {};
+    
+    // ============================================================
+    // FILE LOADING
+    // ============================================================
+    
+    function loadOldFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          oldData = JSON.parse(e.target.result);
+          
+          document.getElementById('oldFileStatus').style.display = 'block';
+          document.getElementById('oldFileName').textContent = file.name;
+          
+          updateOldStats();
+          document.getElementById('oldPreview').textContent = 
+            JSON.stringify(oldData, null, 2).substring(0, 2000) + '\n\n... (truncated)';
+          
+          checkReadyToMerge();
+        } catch (err) {
+          alert('❌ Invalid JSON file: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+    
+    function loadNewFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          newData = JSON.parse(e.target.result);
+          
+          document.getElementById('newFileStatus').style.display = 'block';
+          document.getElementById('newFileName').textContent = file.name;
+          
+          updateNewStats();
+          document.getElementById('newPreview').textContent = 
+            JSON.stringify(newData, null, 2).substring(0, 2000) + '\n\n... (truncated)';
+          
+          checkReadyToMerge();
+        } catch (err) {
+          alert('❌ Invalid JSON file: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+    
+    // ============================================================
+    // STATISTICS
+    // ============================================================
+    
+    function updateOldStats() {
+      const itemCount = countItems(oldData);
+      const shipCount = oldData.visualUpgrades?.shipSkins?.length || 0;
+      
+      document.getElementById('oldItemCount').textContent = itemCount;
+      document.getElementById('oldShipCount').textContent = shipCount;
+    }
+    
+    function updateNewStats() {
+      const itemCount = countItems(newData);
+      const shipCount = newData.visualUpgrades?.shipSkins?.length || 0;
+      
+      document.getElementById('newItemCount').textContent = itemCount;
+      document.getElementById('newShipCount').textContent = shipCount;
+    }
+    
+    function countItems(data) {
+      let count = 0;
+      
+      if (data.items) count += data.items.length;
+      if (data.visualUpgrades?.shipSkins) count += data.visualUpgrades.shipSkins.length;
+      if (data.visualUpgrades?.weaponEffects) count += data.visualUpgrades.weaponEffects.length;
+      
+      return count;
+    }
+    
+    function checkReadyToMerge() {
+      if (oldData && newData) {
+        document.getElementById('mergeBtn').disabled = false;
+      }
+    }
+    
+    // ============================================================
+    // MERGING LOGIC
+    // ============================================================
+    
+    function performMerge() {
+      if (!oldData || !newData) {
+        alert('Please load both files first!');
+        return;
+      }
+      
+      conflicts = [];
+      conflictResolutions = {};
+      
+      // Start with new data structure
+      mergedData = JSON.parse(JSON.stringify(newData));
+      
+      // Merge items
+      if (oldData.items && Array.isArray(oldData.items)) {
+        mergeArray(
+          oldData.items,
+          mergedData.items || [],
+          'items',
+          'id'
+        );
+      }
+      
+      // Merge ship skins
+      if (oldData.visualUpgrades?.shipSkins) {
+        if (!mergedData.visualUpgrades) mergedData.visualUpgrades = {};
+        if (!mergedData.visualUpgrades.shipSkins) mergedData.visualUpgrades.shipSkins = [];
+        
+        mergeArray(
+          oldData.visualUpgrades.shipSkins,
+          mergedData.visualUpgrades.shipSkins,
+          'shipSkins',
+          'id'
+        );
+      }
+      
+      // Merge weapon effects
+      if (oldData.visualUpgrades?.weaponEffects) {
+        if (!mergedData.visualUpgrades) mergedData.visualUpgrades = {};
+        if (!mergedData.visualUpgrades.weaponEffects) mergedData.visualUpgrades.weaponEffects = [];
+        
+        mergeArray(
+          oldData.visualUpgrades.weaponEffects,
+          mergedData.visualUpgrades.weaponEffects,
+          'weaponEffects',
+          'id'
+        );
+      }
+      
+      // Display conflicts or merged result
+      if (conflicts.length > 0) {
+        showConflicts();
+      } else {
+        showMergedResult();
+      }
+    }
+    
+    function mergeArray(oldArray, newArray, arrayName, keyField) {
+      const newIds = new Set(newArray.map(item => item[keyField]));
+      
+      oldArray.forEach(oldItem => {
+        if (newIds.has(oldItem[keyField])) {
+          // Conflict!
+          conflicts.push({
+            type: arrayName,
+            id: oldItem[keyField],
+            oldItem: oldItem,
+            newItem: newArray.find(n => n[keyField] === oldItem[keyField])
+          });
+        } else {
+          // No conflict, add old item
+          newArray.push(oldItem);
+        }
+      });
+    }
+    
+    // ============================================================
+    // CONFLICT RESOLUTION
+    // ============================================================
+    
+    function showConflicts() {
+      document.getElementById('conflictSection').style.display = 'block';
+      document.getElementById('conflictCount').textContent = conflicts.length;
+      
+      const conflictList = document.getElementById('conflictList');
+      conflictList.innerHTML = '';
+      
+      conflicts.forEach((conflict, index) => {
+        const div = document.createElement('div');
+        div.className = 'conflict-item';
+        div.innerHTML = `
+          <h4>Duplicate ID: ${conflict.id}</h4>
+          <p>Both old and new files have an item with ID "${conflict.id}". Which do you want to keep?</p>
+          <div class="conflict-options">
+            <button onclick="resolveConflict(${index}, 'old')" id="conflict_${index}_old">
+              Keep OLD
+            </button>
+            <button onclick="resolveConflict(${index}, 'new')" id="conflict_${index}_new" class="selected">
+              Keep NEW (Recommended)
+            </button>
+          </div>
+        `;
+        conflictList.appendChild(div);
+        
+        // Default: keep new
+        conflictResolutions[index] = 'new';
+      });
+      
+      document.getElementById('downloadBtn').disabled = false;
+    }
+    
+    function resolveConflict(index, choice) {
+      conflictResolutions[index] = choice;
+      
+      // Update UI
+      document.getElementById(`conflict_${index}_old`).classList.toggle('selected', choice === 'old');
+      document.getElementById(`conflict_${index}_new`).classList.toggle('selected', choice === 'new');
+      
+      // Update merged data
+      updateMergedWithResolutions();
+    }
+    
+    function updateMergedWithResolutions() {
+      // Reapply merge with conflict resolutions
+      mergedData = JSON.parse(JSON.stringify(newData));
+      
+      // Apply old items except conflicts
+      if (oldData.items) {
+        oldData.items.forEach(oldItem => {
+          const conflictIndex = conflicts.findIndex(c => c.id === oldItem.id && c.type === 'items');
+          
+          if (conflictIndex === -1) {
+            // No conflict, add it
+            if (!mergedData.items) mergedData.items = [];
+            mergedData.items.push(oldItem);
+          } else if (conflictResolutions[conflictIndex] === 'old') {
+            // Conflict resolved: keep old
+            const newIndex = mergedData.items.findIndex(n => n.id === oldItem.id);
+            if (newIndex !== -1) {
+              mergedData.items[newIndex] = oldItem;
+            }
+          }
+        });
+      }
+      
+      // Same for ship skins
+      if (oldData.visualUpgrades?.shipSkins) {
+        if (!mergedData.visualUpgrades) mergedData.visualUpgrades = {};
+        if (!mergedData.visualUpgrades.shipSkins) mergedData.visualUpgrades.shipSkins = [];
+        
+        oldData.visualUpgrades.shipSkins.forEach(oldSkin => {
+          const conflictIndex = conflicts.findIndex(c => c.id === oldSkin.id && c.type === 'shipSkins');
+          
+          if (conflictIndex === -1) {
+            mergedData.visualUpgrades.shipSkins.push(oldSkin);
+          } else if (conflictResolutions[conflictIndex] === 'old') {
+            const newIndex = mergedData.visualUpgrades.shipSkins.findIndex(n => n.id === oldSkin.id);
+            if (newIndex !== -1) {
+              mergedData.visualUpgrades.shipSkins[newIndex] = oldSkin;
+            }
+          }
+        });
+      }
+      
+      showMergedResult();
+    }
+    
+    function showMergedResult() {
+      const itemCount = countItems(mergedData);
+      document.getElementById('mergedItemCount').textContent = itemCount;
+      
+      const preview = JSON.stringify(mergedData, null, 2);
+      document.getElementById('mergedPreview').textContent = preview;
+      
+      document.getElementById('downloadBtn').disabled = false;
+    }
+    
+    // ============================================================
+    // DOWNLOAD & COPY
+    // ============================================================
+    
+    function downloadMerged() {
+      if (!mergedData) {
+        alert('Please merge files first!');
+        return;
+      }
+      
+      const json = JSON.stringify(mergedData, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'loot-tables-MERGED.json';
+      a.click();
+      
+      URL.revokeObjectURL(url);
+      
+      alert('✅ Downloaded as "loot-tables-MERGED.json"\n\nReview it, then rename to "loot-tables.json"');
+    }
+    
+    function copyToClipboard() {
+      if (!mergedData) {
+        alert('Please merge files first!');
+        return;
+      }
+      
+      const json = JSON.stringify(mergedData, null, 2);
+      navigator.clipboard.writeText(json);
+      
+      alert('✅ Merged JSON copied to clipboard!');
+    }
+  </script>
+
+</body>
+</html>

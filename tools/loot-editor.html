@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V8 Loot Editor - Item & Upgrade Manager</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1f3a 0%, #0f1420 100%);
+      color: #e0e6ff;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .editor-container {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .header h1 {
+      font-size: 48px;
+      background: linear-gradient(90deg, #60A5FA, #8B5CF6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    
+    .header p {
+      color: rgba(200, 210, 255, 0.7);
+      font-size: 16px;
+    }
+    
+    .main-grid {
+      display: grid;
+      grid-template-columns: 300px 1fr 400px;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    
+    /* Sidebar - Item List */
+    .sidebar {
+      background: rgba(30, 40, 70, 0.6);
+      border: 2px solid rgba(100, 200, 255, 0.3);
+      border-radius: 15px;
+      padding: 20px;
+      max-height: 800px;
+      overflow-y: auto;
+    }
+    
+    .sidebar h2 {
+      font-size: 20px;
+      margin-bottom: 15px;
+      color: #60A5FA;
+      border-bottom: 2px solid rgba(100, 200, 255, 0.3);
+      padding-bottom: 10px;
+    }
+    
+    .category-section {
+      margin-bottom: 25px;
+    }
+    
+    .category-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: rgba(200, 210, 255, 0.8);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .item-button {
+      padding: 10px 15px;
+      background: rgba(20, 30, 50, 0.6);
+      border: 1px solid rgba(100, 200, 255, 0.2);
+      border-radius: 8px;
+      color: #e0e6ff;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+      font-size: 13px;
+    }
+    
+    .item-button:hover {
+      background: rgba(96, 165, 250, 0.2);
+      border-color: rgba(96, 165, 250, 0.5);
+      transform: translateX(5px);
+    }
+    
+    .item-button.active {
+      background: rgba(96, 165, 250, 0.3);
+      border-color: #60A5FA;
+    }
+    
+    .rarity-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      margin-left: 8px;
+    }
+    
+    /* Editor Panel */
+    .editor-panel {
+      background: rgba(30, 40, 70, 0.6);
+      border: 2px solid rgba(100, 200, 255, 0.3);
+      border-radius: 15px;
+      padding: 30px;
+      max-height: 800px;
+      overflow-y: auto;
+    }
+    
+    .editor-panel h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #60A5FA;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(200, 210, 255, 0.9);
+      margin-bottom: 8px;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      background: rgba(20, 30, 50, 0.8);
+      border: 1px solid rgba(100, 200, 255, 0.3);
+      border-radius: 8px;
+      color: #e0e6ff;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    
+    .form-group textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #60A5FA;
+      box-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    
+    .effects-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 15px;
+      background: rgba(20, 30, 50, 0.5);
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    
+    .effect-input {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .effect-input label {
+      min-width: 100px;
+      font-size: 12px;
+    }
+    
+    .effect-input input {
+      flex: 1;
+      padding: 8px;
+    }
+    
+    /* Preview Panel */
+    .preview-panel {
+      background: rgba(30, 40, 70, 0.6);
+      border: 2px solid rgba(100, 200, 255, 0.3);
+      border-radius: 15px;
+      padding: 30px;
+    }
+    
+    .preview-panel h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+      color: #60A5FA;
+    }
+    
+    .item-preview {
+      background: linear-gradient(135deg, rgba(30, 40, 70, 0.8), rgba(20, 30, 50, 0.9));
+      border: 2px solid rgba(100, 200, 255, 0.3);
+      border-radius: 15px;
+      padding: 25px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    
+    .preview-glow {
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      opacity: 0.2;
+      filter: blur(30px);
+      animation: previewGlow 3s ease infinite;
+    }
+    
+    @keyframes previewGlow {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 0.4; }
+    }
+    
+    .preview-rarity {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+    }
+    
+    .preview-icon {
+      font-size: 64px;
+      margin: 20px 0;
+    }
+    
+    .preview-name {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+    
+    .preview-description {
+      font-size: 14px;
+      color: rgba(200, 210, 255, 0.8);
+      margin-bottom: 15px;
+      line-height: 1.6;
+    }
+    
+    .preview-stats {
+      text-align: left;
+      padding: 15px;
+      background: rgba(20, 30, 50, 0.5);
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+    
+    .preview-stat {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(100, 200, 255, 0.1);
+    }
+    
+    .preview-stat:last-child {
+      border-bottom: none;
+    }
+    
+    .preview-stat-label {
+      color: rgba(200, 210, 255, 0.7);
+    }
+    
+    .preview-stat-value {
+      color: #60A5FA;
+      font-weight: 700;
+    }
+    
+    /* Action Buttons */
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #60A5FA, #8B5CF6);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(96, 165, 250, 0.4);
+    }
+    
+    .btn-success {
+      background: linear-gradient(135deg, #10B981, #059669);
+      color: white;
+    }
+    
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+    }
+    
+    .btn-danger {
+      background: linear-gradient(135deg, #EF4444, #DC2626);
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+    }
+    
+    .btn-secondary {
+      background: rgba(100, 200, 255, 0.2);
+      border: 1px solid rgba(100, 200, 255, 0.5);
+      color: #60A5FA;
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(100, 200, 255, 0.3);
+    }
+    
+    /* Export/Import Section */
+    .export-section {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(20, 30, 50, 0.5);
+      border-radius: 12px;
+    }
+    
+    .export-section h3 {
+      font-size: 16px;
+      margin-bottom: 15px;
+      color: #8B5CF6;
+    }
+    
+    .code-output {
+      background: rgba(10, 15, 25, 0.8);
+      border: 1px solid rgba(100, 200, 255, 0.2);
+      border-radius: 8px;
+      padding: 15px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #10B981;
+      max-height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    
+    /* Scrollbar Styles */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(20, 25, 45, 0.5);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 200, 255, 0.5);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 200, 255, 0.7);
+    }
+    
+    /* New Item Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal.active {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: rgba(30, 40, 70, 0.95);
+      border: 2px solid rgba(100, 200, 255, 0.5);
+      border-radius: 15px;
+      padding: 30px;
+      max-width: 500px;
+      width: 90%;
+    }
+    
+    .modal-content h3 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #60A5FA;
+    }
+    
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .sidebar,
+      .editor-panel,
+      .preview-panel {
+        max-height: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="editor-container">
+    
+    <!-- Header -->
+    <div class="header">
+      <h1>⚡ V8 LOOT EDITOR</h1>
+      <p>Visual Item & Upgrade Manager - Create, Edit, Balance</p>
+    </div>
+    
+    <!-- Main Grid -->
+    <div class="main-grid">
+      
+      <!-- Sidebar - Item List -->
+      <div class="sidebar">
+        <h2>📦 Item Library</h2>
+        
+        <button class="btn btn-success" style="width: 100%; margin-bottom: 10px;" onclick="openNewItemModal()">
+          + New Item
+        </button>
+        
+        <button class="btn btn-secondary" style="width: 100%; margin-bottom: 10px;" onclick="importJSON()">
+          📥 Import JSON
+        </button>
+        
+        <button class="btn btn-secondary" style="width: 100%; margin-bottom: 20px;" onclick="exportAllJSON()">
+          📤 Export All JSON
+        </button>
+        
+        <div id="itemList">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+      
+      <!-- Editor Panel -->
+      <div class="editor-panel">
+        <h2 id="editorTitle">Select an item to edit</h2>
+        
+        <div id="editorForm">
+          <p style="text-align: center; color: rgba(200, 210, 255, 0.5); padding: 50px 0;">
+            Choose an item from the left sidebar or create a new one
+          </p>
+        </div>
+      </div>
+      
+      <!-- Preview Panel -->
+      <div class="preview-panel">
+        <h2>👁️ Live Preview</h2>
+        
+        <div class="item-preview" id="itemPreview">
+          <div class="preview-glow" id="previewGlow"></div>
+          <div style="position: relative; z-index: 1;">
+            <div class="preview-rarity" id="previewRarity">NORMAL</div>
+            <div class="preview-icon" id="previewIcon">⭐</div>
+            <div class="preview-name" id="previewName">Item Name</div>
+            <div class="preview-description" id="previewDescription">
+              Item description will appear here
+            </div>
+            <div class="preview-stats" id="previewStats">
+              <!-- Stats populated dynamically -->
+            </div>
+          </div>
+        </div>
+        
+        <!-- Export Section -->
+        <div class="export-section">
+          <h3>📋 Export JSON</h3>
+          <div class="code-output" id="jsonOutput">
+            Select an item to see JSON output
+          </div>
+          <button class="btn btn-secondary" style="width: 100%; margin-top: 10px;" onclick="copyJSON()">
+            📋 Copy to Clipboard
+          </button>
+        </div>
+        
+        <div class="action-buttons">
+          <button class="btn btn-primary" onclick="saveItem()">💾 Save Changes</button>
+          <button class="btn btn-danger" onclick="deleteItem()">🗑️ Delete Item</button>
+        </div>
+      </div>
+      
+    </div>
+    
+  </div>
+  
+  <!-- New Item Modal -->
+  <div class="modal" id="newItemModal">
+    <div class="modal-content">
+      <h3>Create New Item</h3>
+      
+      <div class="form-group">
+        <label>Item Category</label>
+        <select id="newItemCategory">
+          <option value="weaponUpgrades.temporary">Weapon - Temporary</option>
+          <option value="weaponUpgrades.runPersistent">Weapon - Run Persistent</option>
+          <option value="weaponUpgrades.permanent">Weapon - Permanent</option>
+          <option value="shipUpgrades.temporary">Ship - Temporary</option>
+          <option value="shipUpgrades.runPersistent">Ship - Run Persistent</option>
+          <option value="shipUpgrades.permanent">Ship - Permanent</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>Rarity</label>
+        <select id="newItemRarity">
+          <option value="NORMAL">Normal</option>
+          <option value="RARE">Rare</option>
+          <option value="EPIC">Epic</option>
+          <option value="LEGENDARY">Legendary</option>
+          <option value="MYTHIC">Mythic</option>
+        </select>
+      </div>
+      
+      <div class="action-buttons">
+        <button class="btn btn-primary" onclick="createNewItem()">Create</button>
+        <button class="btn btn-secondary" onclick="closeNewItemModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Startup Guide Modal -->
+  <div class="modal active" id="startupGuide" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <h3>🚀 Welcome to V8 Loot Editor!</h3>
+      
+      <div style="text-align: left; margin: 20px 0; color: rgba(200, 210, 255, 0.9); line-height: 1.6;">
+        <p><strong>To edit existing items from loot-tables.json:</strong></p>
+        <ol style="margin: 10px 0 20px 20px;">
+          <li>Click <strong>"📥 Import JSON"</strong> in the sidebar</li>
+          <li>Select your <code>loot-tables.json</code> file</li>
+          <li>All existing items will load</li>
+          <li>Click any item to edit</li>
+        </ol>
+        
+        <p><strong>To create new items:</strong></p>
+        <ol style="margin: 10px 0 20px 20px;">
+          <li>Click <strong>"+ New Item"</strong></li>
+          <li>Fill in details</li>
+          <li>Preview updates live</li>
+          <li>Save changes</li>
+        </ol>
+        
+        <p><strong>To export your work:</strong></p>
+        <ol style="margin: 10px 0 20px 20px;">
+          <li>Click <strong>"📤 Export All JSON"</strong></li>
+          <li>Save the file</li>
+          <li>Replace your old <code>loot-tables.json</code></li>
+        </ol>
+        
+        <p style="background: rgba(96, 165, 250, 0.2); padding: 15px; border-radius: 8px; border-left: 4px solid #60A5FA; margin-top: 20px;">
+          <strong>💡 Tip:</strong> If you don't have a loot-tables.json file yet, that's OK! 
+          Start creating items and export when ready.
+        </p>
+      </div>
+      
+      <div class="action-buttons">
+        <button class="btn btn-primary" onclick="closeStartupGuide()" style="grid-column: span 2;">
+          Got It! Let's Start
+        </button>
+      </div>
+      
+      <div style="margin-top: 15px;">
+        <label style="display: flex; align-items: center; gap: 10px; color: rgba(200, 210, 255, 0.7); cursor: pointer;">
+          <input type="checkbox" id="dontShowAgain" style="width: auto;">
+          Don't show this again
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // LOOT EDITOR - Main Application
+    // ============================================================
+    
+    let lootData = null;
+    let currentItem = null;
+    let currentCategory = null;
+    
+    // Rarity colors
+    const rarityColors = {
+      NORMAL: { color: '#9CA3AF', glow: '#D1D5DB' },
+      RARE: { color: '#3B82F6', glow: '#60A5FA' },
+      EPIC: { color: '#8B5CF6', glow: '#A78BFA' },
+      LEGENDARY: { color: '#F59E0B', glow: '#FBBF24' },
+      MYTHIC: { color: '#EC4899', glow: '#F472B6' }
+    };
+    
+    // Initialize
+    async function init() {
+      await loadLootData();
+      renderItemList();
+    }
+    
+    // Load loot data from JSON
+    async function loadLootData() {
+      // Try multiple possible paths
+      const possiblePaths = [
+        '../data/loot-tables.json',
+        './data/loot-tables.json',
+        '../../data/loot-tables.json',
+        '/data/loot-tables.json'
+      ];
+      
+      for (const path of possiblePaths) {
+        try {
+          const response = await fetch(path);
+          if (response.ok) {
+            lootData = await response.json();
+            console.log('✅ Loot data loaded from:', path);
+            console.log('   - Weapon upgrades:', 
+              Object.values(lootData.weaponUpgrades || {}).flat().length);
+            console.log('   - Ship upgrades:', 
+              Object.values(lootData.shipUpgrades || {}).flat().length);
+            return;
+          }
+        } catch (error) {
+          // Continue to next path
+        }
+      }
+      
+      // If all paths fail, show import dialog
+      console.warn('⚠️ Could not auto-load loot-tables.json');
+      showImportDialog();
+      
+      // Create default structure
+      lootData = {
+        weaponUpgrades: { temporary: [], runPersistent: [], permanent: [] },
+        shipUpgrades: { temporary: [], runPersistent: [], permanent: [] },
+        visualUpgrades: { shipSkins: [], weaponEffects: [] },
+        specialCapsules: {},
+        debriefRewards: {},
+        rarityConfig: {
+          NORMAL: { color: '#9CA3AF', glow: '#D1D5DB', dropChance: 0.60 },
+          RARE: { color: '#3B82F6', glow: '#60A5FA', dropChance: 0.20 },
+          EPIC: { color: '#8B5CF6', glow: '#A78BFA', dropChance: 0.10 },
+          LEGENDARY: { color: '#F59E0B', glow: '#FBBF24', dropChance: 0.08 },
+          MYTHIC: { color: '#EC4899', glow: '#F472B6', dropChance: 0.02 }
+        }
+      };
+    }
+    
+    // Show import dialog
+    function showImportDialog() {
+      const notice = document.createElement('div');
+      notice.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #F59E0B, #EF4444);
+        color: white;
+        padding: 20px 30px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        z-index: 10000;
+        max-width: 600px;
+        text-align: center;
+      `;
+      notice.innerHTML = `
+        <div style="font-size: 18px; font-weight: 700; margin-bottom: 10px;">
+          ⚠️ Cannot Auto-Load loot-tables.json
+        </div>
+        <div style="font-size: 14px; margin-bottom: 15px;">
+          Click "Import JSON" below to manually load your existing loot data
+        </div>
+        <button onclick="this.parentElement.remove()" style="
+          padding: 10px 20px;
+          background: white;
+          color: #EF4444;
+          border: none;
+          border-radius: 8px;
+          font-weight: 700;
+          cursor: pointer;
+        ">Got It</button>
+      `;
+      document.body.appendChild(notice);
+      
+      // Auto-remove after 10 seconds
+      setTimeout(() => notice.remove(), 10000);
+    }
+    
+    // Render item list sidebar
+    function renderItemList() {
+      const container = document.getElementById('itemList');
+      container.innerHTML = '';
+      
+      const categories = [
+        { label: 'Weapon - Temporary', path: 'weaponUpgrades.temporary' },
+        { label: 'Weapon - Run Persistent', path: 'weaponUpgrades.runPersistent' },
+        { label: 'Weapon - Permanent', path: 'weaponUpgrades.permanent' },
+        { label: 'Ship - Temporary', path: 'shipUpgrades.temporary' },
+        { label: 'Ship - Run Persistent', path: 'shipUpgrades.runPersistent' },
+        { label: 'Ship - Permanent', path: 'shipUpgrades.permanent' }
+      ];
+      
+      categories.forEach(category => {
+        const section = document.createElement('div');
+        section.className = 'category-section';
+        
+        const title = document.createElement('div');
+        title.className = 'category-title';
+        title.textContent = category.label;
+        section.appendChild(title);
+        
+        const itemListDiv = document.createElement('div');
+        itemListDiv.className = 'item-list';
+        
+        const [main, sub] = category.path.split('.');
+        const items = lootData[main][sub] || [];
+        
+        items.forEach((item, index) => {
+          const btn = document.createElement('button');
+          btn.className = 'item-button';
+          btn.innerHTML = `
+            ${item.name}
+            <span class="rarity-badge" style="background: ${rarityColors[item.rarity].color}20; color: ${rarityColors[item.rarity].color};">
+              ${item.rarity}
+            </span>
+          `;
+          btn.onclick = () => selectItem(category.path, index);
+          itemListDiv.appendChild(btn);
+        });
+        
+        section.appendChild(itemListDiv);
+        container.appendChild(section);
+      });
+    }
+    
+    // Select item for editing
+    function selectItem(categoryPath, index) {
+      const [main, sub] = categoryPath.split('.');
+      currentItem = lootData[main][sub][index];
+      currentCategory = categoryPath;
+      
+      renderEditor();
+      updatePreview();
+      
+      // Highlight selected
+      document.querySelectorAll('.item-button').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.item-button')[
+        getAllItems().findIndex(item => item === currentItem)
+      ].classList.add('active');
+    }
+    
+    // Get all items (helper)
+    function getAllItems() {
+      const all = [];
+      ['weaponUpgrades', 'shipUpgrades'].forEach(main => {
+        ['temporary', 'runPersistent', 'permanent'].forEach(sub => {
+          all.push(...(lootData[main][sub] || []));
+        });
+      });
+      return all;
+    }
+    
+    // Render editor form
+    function renderEditor() {
+      if (!currentItem) return;
+      
+      document.getElementById('editorTitle').textContent = `Editing: ${currentItem.name}`;
+      
+      const form = document.getElementById('editorForm');
+      form.innerHTML = `
+        <div class="form-group">
+          <label>Item ID</label>
+          <input type="text" id="itemId" value="${currentItem.id || ''}" disabled>
+        </div>
+        
+        <div class="form-group">
+          <label>Item Name</label>
+          <input type="text" id="itemName" value="${currentItem.name || ''}" oninput="updatePreview()">
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Rarity</label>
+            <select id="itemRarity" onchange="updatePreview()">
+              <option value="NORMAL" ${currentItem.rarity === 'NORMAL' ? 'selected' : ''}>Normal</option>
+              <option value="RARE" ${currentItem.rarity === 'RARE' ? 'selected' : ''}>Rare</option>
+              <option value="EPIC" ${currentItem.rarity === 'EPIC' ? 'selected' : ''}>Epic</option>
+              <option value="LEGENDARY" ${currentItem.rarity === 'LEGENDARY' ? 'selected' : ''}>Legendary</option>
+              <option value="MYTHIC" ${currentItem.rarity === 'MYTHIC' ? 'selected' : ''}>Mythic</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Icon Type</label>
+            <select id="iconType" onchange="toggleIconInputs()">
+              <option value="emoji" ${!currentItem.iconImage ? 'selected' : ''}>Emoji</option>
+              <option value="upload" ${currentItem.iconImage && currentItem.iconImage.startsWith('data:') ? 'selected' : ''}>Upload Image</option>
+              <option value="url" ${currentItem.iconImage && !currentItem.iconImage.startsWith('data:') ? 'selected' : ''}>Image URL</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group" id="emojiInput" style="display: ${!currentItem.iconImage ? 'block' : 'none'}">
+          <label>Icon Emoji</label>
+          <input type="text" id="itemIcon" value="${currentItem.icon || '⭐'}" maxlength="2" oninput="updatePreview()">
+          <small style="color: rgba(200, 210, 255, 0.6); font-size: 12px;">Use any emoji: 🚀 💎 ⚡ 🎯 etc.</small>
+        </div>
+        
+        <div class="form-group" id="uploadInput" style="display: ${currentItem.iconImage && currentItem.iconImage.startsWith('data:') ? 'block' : 'none'}">
+          <label>Upload Icon Image</label>
+          <input type="file" id="iconUpload" accept="image/*" onchange="handleImageUpload(event)">
+          <small style="color: rgba(200, 210, 255, 0.6); font-size: 12px;">Recommended: 128x128px PNG with transparency</small>
+        </div>
+        
+        <div class="form-group" id="urlInput" style="display: ${currentItem.iconImage && !currentItem.iconImage.startsWith('data:') ? 'block' : 'none'}">
+          <label>Icon Image URL</label>
+          <input type="text" id="iconUrl" value="${currentItem.iconImage || ''}" oninput="updatePreview()" placeholder="https://example.com/icon.png">
+          <small style="color: rgba(200, 210, 255, 0.6); font-size: 12px;">Direct link to image file</small>
+        </div>
+        
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="itemDescription" oninput="updatePreview()">${currentItem.description || ''}</textarea>
+        </div>
+        
+        ${currentItem.type === 'temporary' ? `
+          <div class="form-group">
+            <label>Duration (ms)</label>
+            <input type="number" id="itemDuration" value="${currentItem.duration || 10000}" oninput="updatePreview()">
+          </div>
+        ` : ''}
+        
+        <div class="form-group">
+          <label>Effects</label>
+          <div class="effects-grid" id="effectsGrid">
+            ${renderEffectsInputs()}
+          </div>
+        </div>
+      `;
+    }
+    
+    // Render effect inputs based on item type
+    function renderEffectsInputs() {
+      const effects = currentItem.effects || {};
+      const possibleEffects = [
+        'damage', 'fireRate', 'projectileSpeed', 'pierce', 'critChance',
+        'maxHealth', 'speed', 'dodgeChance', 'damageReduction', 'lifesteal'
+      ];
+      
+      return possibleEffects.map(effect => `
+        <div class="effect-input">
+          <label>${effect}</label>
+          <input 
+            type="number" 
+            step="0.01" 
+            id="effect_${effect}" 
+            value="${effects[effect] || 0}"
+            oninput="updatePreview()"
+          >
+        </div>
+      `).join('');
+    }
+    
+    // Update live preview
+    function updatePreview() {
+      if (!currentItem) return;
+      
+      const name = document.getElementById('itemName')?.value || currentItem.name;
+      const rarity = document.getElementById('itemRarity')?.value || currentItem.rarity;
+      const iconType = document.getElementById('iconType')?.value || 'emoji';
+      
+      let iconDisplay = '';
+      
+      if (iconType === 'emoji') {
+        const icon = document.getElementById('itemIcon')?.value || currentItem.icon;
+        iconDisplay = `<div class="preview-icon">${icon}</div>`;
+      } else if (iconType === 'url') {
+        const iconUrl = document.getElementById('iconUrl')?.value || currentItem.iconImage;
+        if (iconUrl) {
+          iconDisplay = `<img src="${iconUrl}" class="preview-icon-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" style="width: 64px; height: 64px; object-fit: contain; margin: 20px 0;">
+                        <div class="preview-icon" style="display: none;">❌</div>`;
+        } else {
+          iconDisplay = `<div class="preview-icon">⭐</div>`;
+        }
+      } else if (iconType === 'upload') {
+        const iconImage = currentItem.iconImage;
+        if (iconImage && iconImage.startsWith('data:')) {
+          iconDisplay = `<img src="${iconImage}" class="preview-icon-image" style="width: 64px; height: 64px; object-fit: contain; margin: 20px 0;">`;
+        } else {
+          iconDisplay = `<div class="preview-icon">📁</div>`;
+        }
+      }
+      
+      const description = document.getElementById('itemDescription')?.value || currentItem.description;
+      
+      // Update preview elements
+      document.getElementById('previewName').textContent = name;
+      document.getElementById('previewRarity').textContent = rarity;
+      document.getElementById('previewIcon').innerHTML = iconDisplay;
+      document.getElementById('previewDescription').textContent = description;
+      
+      // Update colors
+      const colors = rarityColors[rarity];
+      document.getElementById('previewName').style.color = colors.color;
+      document.getElementById('previewRarity').style.color = colors.color;
+      document.getElementById('previewGlow').style.background = colors.glow;
+      
+      // Update stats
+      const statsDiv = document.getElementById('previewStats');
+      statsDiv.innerHTML = '';
+      
+      const effectInputs = document.querySelectorAll('[id^="effect_"]');
+      effectInputs.forEach(input => {
+        const value = parseFloat(input.value);
+        if (value !== 0) {
+          const statName = input.id.replace('effect_', '');
+          const statDiv = document.createElement('div');
+          statDiv.className = 'preview-stat';
+          statDiv.innerHTML = `
+            <span class="preview-stat-label">${statName}</span>
+            <span class="preview-stat-value">${value > 0 ? '+' : ''}${value}</span>
+          `;
+          statsDiv.appendChild(statDiv);
+        }
+      });
+      
+      // Update JSON output
+      updateJSONOutput();
+    }
+    
+    // Toggle icon input fields based on type
+    function toggleIconInputs() {
+      const iconType = document.getElementById('iconType').value;
+      
+      document.getElementById('emojiInput').style.display = iconType === 'emoji' ? 'block' : 'none';
+      document.getElementById('uploadInput').style.display = iconType === 'upload' ? 'block' : 'none';
+      document.getElementById('urlInput').style.display = iconType === 'url' ? 'block' : 'none';
+      
+      updatePreview();
+    }
+    
+    // Handle image upload
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please upload an image file (PNG, JPG, GIF, etc.)');
+        return;
+      }
+      
+      // Validate file size (max 1MB)
+      if (file.size > 1024 * 1024) {
+        alert('Image too large! Please use an image under 1MB.');
+        return;
+      }
+      
+      // Read file as base64
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        currentItem.iconImage = e.target.result;
+        updatePreview();
+      };
+      reader.readAsDataURL(file);
+    }
+    
+    // Update JSON output
+    function updateJSONOutput() {
+      if (!currentItem) return;
+      
+      const iconType = document.getElementById('iconType')?.value || 'emoji';
+      
+      const updatedItem = {
+        ...currentItem,
+        name: document.getElementById('itemName')?.value || currentItem.name,
+        rarity: document.getElementById('itemRarity')?.value || currentItem.rarity,
+        description: document.getElementById('itemDescription')?.value || currentItem.description
+      };
+      
+      // Handle icon based on type
+      if (iconType === 'emoji') {
+        updatedItem.icon = document.getElementById('itemIcon')?.value || currentItem.icon;
+        delete updatedItem.iconImage; // Remove image if switching to emoji
+      } else if (iconType === 'url') {
+        updatedItem.iconImage = document.getElementById('iconUrl')?.value || currentItem.iconImage;
+        updatedItem.icon = '🖼️'; // Fallback emoji
+      } else if (iconType === 'upload') {
+        updatedItem.iconImage = currentItem.iconImage;
+        updatedItem.icon = '🖼️'; // Fallback emoji
+      }
+      
+      // Collect effects
+      const effects = {};
+      document.querySelectorAll('[id^="effect_"]').forEach(input => {
+        const value = parseFloat(input.value);
+        if (value !== 0) {
+          const statName = input.id.replace('effect_', '');
+          effects[statName] = value;
+        }
+      });
+      updatedItem.effects = effects;
+      
+      document.getElementById('jsonOutput').textContent = JSON.stringify(updatedItem, null, 2);
+    }
+    
+    // Save item changes
+    function saveItem() {
+      if (!currentItem || !currentCategory) return;
+      
+      const [main, sub] = currentCategory.split('.');
+      const items = lootData[main][sub];
+      const index = items.indexOf(currentItem);
+      
+      const iconType = document.getElementById('iconType')?.value || 'emoji';
+      
+      // Update item
+      items[index] = {
+        ...currentItem,
+        name: document.getElementById('itemName').value,
+        rarity: document.getElementById('itemRarity').value,
+        description: document.getElementById('itemDescription').value,
+        effects: {}
+      };
+      
+      // Handle icon based on type
+      if (iconType === 'emoji') {
+        items[index].icon = document.getElementById('itemIcon').value;
+        delete items[index].iconImage;
+      } else if (iconType === 'url') {
+        items[index].iconImage = document.getElementById('iconUrl').value;
+        items[index].icon = '🖼️'; // Fallback
+      } else if (iconType === 'upload') {
+        items[index].iconImage = currentItem.iconImage;
+        items[index].icon = '🖼️'; // Fallback
+      }
+      
+      // Collect effects
+      document.querySelectorAll('[id^="effect_"]').forEach(input => {
+        const value = parseFloat(input.value);
+        if (value !== 0) {
+          const statName = input.id.replace('effect_', '');
+          items[index].effects[statName] = value;
+        }
+      });
+      
+      currentItem = items[index];
+      
+      alert('✅ Item saved! (Note: Download JSON to persist changes)');
+      renderItemList();
+    }
+    
+    // Delete item
+    function deleteItem() {
+      if (!currentItem || !currentCategory) return;
+      
+      if (!confirm(`Delete "${currentItem.name}"?`)) return;
+      
+      const [main, sub] = currentCategory.split('.');
+      const items = lootData[main][sub];
+      const index = items.indexOf(currentItem);
+      
+      items.splice(index, 1);
+      
+      currentItem = null;
+      currentCategory = null;
+      
+      document.getElementById('editorTitle').textContent = 'Select an item to edit';
+      document.getElementById('editorForm').innerHTML = '<p style="text-align: center; color: rgba(200, 210, 255, 0.5); padding: 50px 0;">Item deleted</p>';
+      
+      renderItemList();
+    }
+    
+    // Copy JSON to clipboard
+    function copyJSON() {
+      const json = document.getElementById('jsonOutput').textContent;
+      navigator.clipboard.writeText(json);
+      alert('📋 Copied to clipboard!');
+    }
+    
+    // Import JSON (manual load)
+    function importJSON() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          try {
+            const imported = JSON.parse(event.target.result);
+            
+            // Validate structure
+            if (!imported.weaponUpgrades || !imported.shipUpgrades) {
+              alert('❌ Invalid JSON structure! Must contain weaponUpgrades and shipUpgrades.');
+              return;
+            }
+            
+            // Merge with existing data (or replace)
+            const action = confirm('Replace ALL existing items?\n\nOK = Replace All\nCancel = Merge with existing');
+            
+            if (action) {
+              // Replace
+              lootData = imported;
+            } else {
+              // Merge
+              Object.keys(imported.weaponUpgrades || {}).forEach(category => {
+                if (imported.weaponUpgrades[category]) {
+                  lootData.weaponUpgrades[category] = [
+                    ...(lootData.weaponUpgrades[category] || []),
+                    ...imported.weaponUpgrades[category]
+                  ];
+                }
+              });
+              
+              Object.keys(imported.shipUpgrades || {}).forEach(category => {
+                if (imported.shipUpgrades[category]) {
+                  lootData.shipUpgrades[category] = [
+                    ...(lootData.shipUpgrades[category] || []),
+                    ...imported.shipUpgrades[category]
+                  ];
+                }
+              });
+              
+              // Update other categories
+              if (imported.rarityConfig) {
+                lootData.rarityConfig = imported.rarityConfig;
+              }
+              if (imported.visualUpgrades) {
+                lootData.visualUpgrades = imported.visualUpgrades;
+              }
+            }
+            
+            renderItemList();
+            
+            // Count items
+            const weaponCount = Object.values(lootData.weaponUpgrades).flat().length;
+            const shipCount = Object.values(lootData.shipUpgrades).flat().length;
+            
+            alert(`✅ JSON Imported!\n\n${weaponCount} weapon upgrades\n${shipCount} ship upgrades`);
+            
+          } catch (error) {
+            alert(`❌ Failed to parse JSON:\n\n${error.message}`);
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    }
+    
+    // Export all JSON
+    function exportAllJSON() {
+      const json = JSON.stringify(lootData, null, 2);
+      
+      // Create download
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'loot-tables.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      alert('✅ Complete loot-tables.json exported!\n\nSave this to your /data/ folder.');
+    }
+    
+    // New item modal
+    function openNewItemModal() {
+      document.getElementById('newItemModal').classList.add('active');
+    }
+    
+    function closeNewItemModal() {
+      document.getElementById('newItemModal').classList.remove('active');
+    }
+    
+    function createNewItem() {
+      const category = document.getElementById('newItemCategory').value;
+      const rarity = document.getElementById('newItemRarity').value;
+      
+      const [main, sub] = category.split('.');
+      
+      const newItem = {
+        id: `new_item_${Date.now()}`,
+        name: 'New Item',
+        rarity: rarity,
+        type: sub,
+        icon: '⭐',
+        description: 'New item description',
+        effects: {}
+      };
+      
+      lootData[main][sub].push(newItem);
+      
+      closeNewItemModal();
+      renderItemList();
+      selectItem(category, lootData[main][sub].length - 1);
+    }
+    
+    // Initialize on load
+    init();
+    
+    // Show startup guide (unless disabled)
+    function showStartupGuideIfNeeded() {
+      const dontShow = localStorage.getItem('v8_editor_hideGuide');
+      if (!dontShow) {
+        setTimeout(() => {
+          document.getElementById('startupGuide').style.display = 'flex';
+        }, 500);
+      }
+    }
+    
+    function closeStartupGuide() {
+      const checkbox = document.getElementById('dontShowAgain');
+      if (checkbox.checked) {
+        localStorage.setItem('v8_editor_hideGuide', 'true');
+      }
+      document.getElementById('startupGuide').style.display = 'none';
+    }
+    
+    // Show guide on first load
+    showStartupGuideIfNeeded();
+  </script>
+
+</body>
+</html>
